@@ -1,0 +1,17 @@
+groups:
+- name: incident_review_alerts
+  interval: 30s
+  rules:
+  - alert: Order_ServiceHighLatency
+    expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{service="order-service"}[5m])) by (le)) *
+      1000 > 5
+    for: 5m
+    labels:
+      severity: warning
+      team: incident
+      component: service
+      service: order-service
+    annotations:
+      summary: order-service p95 latency is high
+      description: 'p95 latency for order-service is {{ $value }}ms (threshold: 5ms) over the last 5m.'
+      runbook_url: https://runbooks.example.com/alerts/order-service-high-latency

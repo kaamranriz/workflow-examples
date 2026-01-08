@@ -1,0 +1,17 @@
+groups:
+- name: incident_review_alerts
+  interval: 30s
+  rules:
+  - alert: Inventory_ServiceHighLatency
+    expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{service="inventory-service"}[5m])) by (le))
+      * 1000 > 5
+    for: 5m
+    labels:
+      severity: warning
+      team: incident
+      component: service
+      service: inventory-service
+    annotations:
+      summary: inventory-service p95 latency is high
+      description: 'p95 latency for inventory-service is {{ $value }}ms (threshold: 5ms) over the last 5m.'
+      runbook_url: https://runbooks.example.com/alerts/inventory-service-high-latency

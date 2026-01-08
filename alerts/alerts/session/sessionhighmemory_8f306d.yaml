@@ -1,0 +1,17 @@
+groups:
+- name: incident_review_alerts
+  interval: 30s
+  rules:
+  - alert: SessionHighMemory
+    expr: (process_resident_memory_bytes{service="session"} / process_virtual_memory_max_bytes{service="session"}) * 100 >
+      5
+    for: 5m
+    labels:
+      severity: warning
+      team: incident
+      component: service
+      service: session
+    annotations:
+      summary: session memory usage is high
+      description: 'Memory usage for session is {{ $value }}% (threshold: 5%) over the last 5m.'
+      runbook_url: https://runbooks.example.com/alerts/session-high-memory
