@@ -1,0 +1,45 @@
+# Sample Prometheus alerts for API services
+# This file provides patterns for the Alert Generator workflow to learn from
+
+groups:
+  - name: api-alerts
+    rules:
+      - alert: HighAPILatency
+        expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job="api-gateway"}[5m])) by (le)) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+          service: api-gateway
+        annotations:
+          summary: High API latency detected
+          description: 95th percentile latency is {{ $value | printf "%.2f" }}s, threshold is 0.5s
+          runbook_url: https://runbooks.example.com/api-latency
+          dashboard_url: https://grafana.example.com/d/api-latency
+
+      - alert: HighAPIErrorRate
+        expr: sum(rate(http_requests_total{job="api-gateway", status=~"5.."}[5m])) / sum(rate(http_requests_total{job="api-gateway"}[5m])) > 0.05
+        for: 2m
+        labels:
+          severity: critical
+          team: platform
+          service: api-gateway
+        annotations:
+          summary: High API error rate
+          description: Error rate is {{ $value | printf "%.2f" }}%, threshold is 5%
+          runbook_url: https://runbooks.example.com/api-errors
+
+      - alert: APIEndpointDown
+        expr: up{job="api-gateway"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          team: platform
+          service: api-gateway
+          pagerduty: enabled
+        annotations:
+          summary: API Gateway endpoint is down
+          description: "API Gateway instance {{ $labels.instance }} is not responding"
+          runbook_url: https://runbooks.example.com/api-down
+
+

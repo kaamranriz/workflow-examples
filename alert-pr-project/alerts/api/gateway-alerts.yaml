@@ -1,0 +1,102 @@
+# API Gateway Alerts
+# Owner: Platform Team (@platform-oncall)
+# Last Updated: 2024-11-15
+
+groups:
+  - name: api-gateway.availability
+    interval: 30s
+    rules:
+      - alert: APIGatewayDown
+        expr: up{job="api-gateway"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          team: platform
+          service: api-gateway
+          tier: frontend
+          pagerduty: enabled
+        annotations:
+          summary: "API Gateway instance is down"
+          description: "API Gateway instance {{ $labels.instance }} has been unreachable for more than 1 minute."
+          runbook_url: "https://runbooks.techcorp.io/api-gateway/down"
+          dashboard_url: "https://grafana.techcorp.io/d/api-gateway-overview"
+          slack_channel: "#platform-alerts"
+
+      - alert: APIGatewayHighErrorRate
+        expr: |
+          sum(rate(http_requests_total{job="api-gateway", status=~"5.."}[5m])) 
+          / sum(rate(http_requests_total{job="api-gateway"}[5m])) > 0.05
+        for: 2m
+        labels:
+          severity: critical
+          team: platform
+          service: api-gateway
+          tier: frontend
+          pagerduty: enabled
+        annotations:
+          summary: "High 5xx error rate on API Gateway"
+          description: "API Gateway error rate is {{ $value | humanizePercentage }}, exceeding 5% threshold."
+          runbook_url: "https://runbooks.techcorp.io/api-gateway/high-error-rate"
+          dashboard_url: "https://grafana.techcorp.io/d/api-gateway-errors"
+          slack_channel: "#platform-alerts"
+
+  - name: api-gateway.latency
+    interval: 30s
+    rules:
+      - alert: APIGatewayHighLatencyP95
+        expr: |
+          histogram_quantile(0.95, 
+            sum(rate(http_request_duration_seconds_bucket{job="api-gateway"}[5m])) by (le)
+          ) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+          service: api-gateway
+          tier: frontend
+        annotations:
+          summary: "High P95 latency on API Gateway"
+          description: "API Gateway P95 latency is {{ $value | humanizeDuration }}, exceeding 500ms threshold."
+          runbook_url: "https://runbooks.techcorp.io/api-gateway/high-latency"
+          dashboard_url: "https://grafana.techcorp.io/d/api-gateway-latency"
+          slack_channel: "#platform-alerts"
+
+      - alert: APIGatewayHighLatencyP99
+        expr: |
+          histogram_quantile(0.99, 
+            sum(rate(http_request_duration_seconds_bucket{job="api-gateway"}[5m])) by (le)
+          ) > 2.0
+        for: 5m
+        labels:
+          severity: critical
+          team: platform
+          service: api-gateway
+          tier: frontend
+        annotations:
+          summary: "Critical P99 latency on API Gateway"
+          description: "API Gateway P99 latency is {{ $value | humanizeDuration }}, exceeding 2s threshold."
+          runbook_url: "https://runbooks.techcorp.io/api-gateway/critical-latency"
+          dashboard_url: "https://grafana.techcorp.io/d/api-gateway-latency"
+          slack_channel: "#platform-alerts"
+
+  - name: api-gateway.traffic
+    interval: 30s
+    rules:
+      - alert: APIGatewayTrafficSpike
+        expr: |
+          sum(rate(http_requests_total{job="api-gateway"}[5m])) 
+          > 2 * sum(rate(http_requests_total{job="api-gateway"}[1h] offset 1d))
+        for: 10m
+        labels:
+          severity: warning
+          team: platform
+          service: api-gateway
+          tier: frontend
+        annotations:
+          summary: "Unusual traffic spike on API Gateway"
+          description: "Current traffic is 2x higher than same time yesterday. Current: {{ $value | humanize }} req/s"
+          runbook_url: "https://runbooks.techcorp.io/api-gateway/traffic-spike"
+          dashboard_url: "https://grafana.techcorp.io/d/api-gateway-traffic"
+          slack_channel: "#platform-alerts"
+
+

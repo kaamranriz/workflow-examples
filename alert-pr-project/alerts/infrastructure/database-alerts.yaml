@@ -1,0 +1,96 @@
+# Database Infrastructure Alerts
+# Owner: Platform Team (@platform-oncall)
+# Last Updated: 2024-10-25
+
+groups:
+  - name: postgresql.availability
+    interval: 30s
+    rules:
+      - alert: PostgreSQLDown
+        expr: pg_up == 0
+        for: 1m
+        labels:
+          severity: critical
+          team: platform
+          service: postgresql
+          tier: database
+          pagerduty: enabled
+        annotations:
+          summary: "PostgreSQL is down"
+          description: "PostgreSQL instance {{ $labels.instance }} is unreachable. Database-dependent services will fail."
+          runbook_url: "https://runbooks.techcorp.io/postgresql/down"
+          dashboard_url: "https://grafana.techcorp.io/d/postgresql-overview"
+          slack_channel: "#platform-alerts"
+
+      - alert: PostgreSQLReplicationLag
+        expr: pg_replication_lag_seconds > 30
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+          service: postgresql
+          tier: database
+        annotations:
+          summary: "PostgreSQL replication lag is high"
+          description: "Replication lag on {{ $labels.instance }} is {{ $value | printf \"%.0f\" }} seconds. Read replicas may serve stale data."
+          runbook_url: "https://runbooks.techcorp.io/postgresql/replication-lag"
+          dashboard_url: "https://grafana.techcorp.io/d/postgresql-replication"
+          slack_channel: "#platform-alerts"
+
+  - name: postgresql.performance
+    interval: 30s
+    rules:
+      - alert: PostgreSQLHighConnections
+        expr: |
+          sum(pg_stat_activity_count) by (instance) 
+          / sum(pg_settings_max_connections) by (instance) > 0.80
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+          service: postgresql
+          tier: database
+        annotations:
+          summary: "PostgreSQL connection pool nearly exhausted"
+          description: "PostgreSQL {{ $labels.instance }} is using {{ $value | humanizePercentage }} of max connections."
+          runbook_url: "https://runbooks.techcorp.io/postgresql/high-connections"
+          dashboard_url: "https://grafana.techcorp.io/d/postgresql-connections"
+          slack_channel: "#platform-alerts"
+
+      - alert: PostgreSQLSlowQueries
+        expr: |
+          rate(pg_stat_statements_seconds_total[5m]) 
+          / rate(pg_stat_statements_calls_total[5m]) > 1.0
+        for: 10m
+        labels:
+          severity: warning
+          team: platform
+          service: postgresql
+          tier: database
+        annotations:
+          summary: "PostgreSQL queries are slow"
+          description: "Average query time is {{ $value | humanizeDuration }}. Application performance may be degraded."
+          runbook_url: "https://runbooks.techcorp.io/postgresql/slow-queries"
+          dashboard_url: "https://grafana.techcorp.io/d/postgresql-queries"
+          slack_channel: "#platform-alerts"
+
+  - name: postgresql.storage
+    interval: 60s
+    rules:
+      - alert: PostgreSQLDiskSpaceLow
+        expr: |
+          (pg_database_size_bytes / on(instance) pg_data_directory_size_bytes) > 0.80
+        for: 10m
+        labels:
+          severity: warning
+          team: platform
+          service: postgresql
+          tier: database
+        annotations:
+          summary: "PostgreSQL disk space running low"
+          description: "Database {{ $labels.datname }} is using {{ $value | humanizePercentage }} of disk space."
+          runbook_url: "https://runbooks.techcorp.io/postgresql/disk-space"
+          dashboard_url: "https://grafana.techcorp.io/d/postgresql-storage"
+          slack_channel: "#platform-alerts"
+
+

@@ -1,0 +1,100 @@
+# Payment Service Alerts
+# Owner: Payments Team (@payments-oncall)
+# Last Updated: 2024-11-01
+
+groups:
+  - name: payment-service.availability
+    interval: 30s
+    rules:
+      - alert: PaymentServiceDown
+        expr: up{job="payment-service"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          team: payments
+          service: payment-service
+          tier: backend
+          pagerduty: enabled
+        annotations:
+          summary: "Payment Service is down"
+          description: "Payment Service instance {{ $labels.instance }} has been unreachable for more than 1 minute. All payment processing is affected."
+          runbook_url: "https://runbooks.techcorp.io/payment-service/down"
+          dashboard_url: "https://grafana.techcorp.io/d/payment-service-overview"
+          slack_channel: "#payments-alerts"
+
+      - alert: PaymentServiceHighErrorRate
+        expr: |
+          sum(rate(http_requests_total{job="payment-service", status=~"5.."}[5m])) 
+          / sum(rate(http_requests_total{job="payment-service"}[5m])) > 0.01
+        for: 2m
+        labels:
+          severity: critical
+          team: payments
+          service: payment-service
+          tier: backend
+          pagerduty: enabled
+        annotations:
+          summary: "High error rate on Payment Service"
+          description: "Payment Service error rate is {{ $value | humanizePercentage }}, exceeding 1% threshold. Revenue impact likely."
+          runbook_url: "https://runbooks.techcorp.io/payment-service/high-error-rate"
+          dashboard_url: "https://grafana.techcorp.io/d/payment-service-errors"
+          slack_channel: "#payments-alerts"
+
+  - name: payment-service.latency
+    interval: 30s
+    rules:
+      - alert: PaymentProcessingSlowP95
+        expr: |
+          histogram_quantile(0.95, 
+            sum(rate(payment_processing_duration_seconds_bucket{job="payment-service"}[5m])) by (le)
+          ) > 3.0
+        for: 5m
+        labels:
+          severity: warning
+          team: payments
+          service: payment-service
+          tier: backend
+        annotations:
+          summary: "Slow payment processing"
+          description: "P95 payment processing time is {{ $value | humanizeDuration }}, exceeding 3s threshold. Customer experience degraded."
+          runbook_url: "https://runbooks.techcorp.io/payment-service/slow-processing"
+          dashboard_url: "https://grafana.techcorp.io/d/payment-service-latency"
+          slack_channel: "#payments-alerts"
+
+  - name: payment-service.business
+    interval: 60s
+    rules:
+      - alert: PaymentDeclineRateHigh
+        expr: |
+          sum(rate(payment_transactions_total{job="payment-service", status="declined"}[15m])) 
+          / sum(rate(payment_transactions_total{job="payment-service"}[15m])) > 0.15
+        for: 10m
+        labels:
+          severity: warning
+          team: payments
+          service: payment-service
+          tier: backend
+        annotations:
+          summary: "High payment decline rate"
+          description: "Payment decline rate is {{ $value | humanizePercentage }} over the last 15 minutes, exceeding 15% threshold."
+          runbook_url: "https://runbooks.techcorp.io/payment-service/high-decline-rate"
+          dashboard_url: "https://grafana.techcorp.io/d/payment-service-business"
+          slack_channel: "#payments-alerts"
+
+      - alert: NoPaymentsProcessed
+        expr: sum(rate(payment_transactions_total{job="payment-service"}[5m])) == 0
+        for: 5m
+        labels:
+          severity: critical
+          team: payments
+          service: payment-service
+          tier: backend
+          pagerduty: enabled
+        annotations:
+          summary: "No payments being processed"
+          description: "No payment transactions have been processed in the last 5 minutes. This is a critical revenue impact."
+          runbook_url: "https://runbooks.techcorp.io/payment-service/no-payments"
+          dashboard_url: "https://grafana.techcorp.io/d/payment-service-business"
+          slack_channel: "#payments-alerts"
+
+

@@ -1,0 +1,56 @@
+# Sample Prometheus alerts for Database services
+# These alerts follow the same conventions as api-alerts.yaml
+
+groups:
+  - name: database-alerts
+    rules:
+      - alert: HighDatabaseConnections
+        expr: pg_stat_activity_count{datname!=""} > 100
+        for: 5m
+        labels:
+          severity: warning
+          team: data
+          service: postgresql
+        annotations:
+          summary: High number of database connections
+          description: Database {{ $labels.datname }} has {{ $value }} active connections
+          runbook_url: https://runbooks.example.com/db-connections
+          dashboard_url: https://grafana.example.com/d/postgresql
+
+      - alert: DatabaseReplicationLag
+        expr: pg_replication_lag_seconds > 30
+        for: 5m
+        labels:
+          severity: critical
+          team: data
+          service: postgresql
+        annotations:
+          summary: Database replication lag is high
+          description: Replication lag is {{ $value | printf "%.0f" }} seconds
+          runbook_url: https://runbooks.example.com/db-replication
+
+      - alert: DatabaseDiskSpaceLow
+        expr: (pg_database_size_bytes / pg_tablespace_size_bytes) * 100 > 80
+        for: 10m
+        labels:
+          severity: warning
+          team: data
+          service: postgresql
+        annotations:
+          summary: Database disk space is running low
+          description: "Database {{ $labels.datname }} is using {{ $value | printf \"%.1f\" }}% of available space"
+          runbook_url: https://runbooks.example.com/db-diskspace
+
+      - alert: SlowDatabaseQueries
+        expr: rate(pg_stat_statements_mean_time_seconds{query!~"^(BEGIN|COMMIT|ROLLBACK).*"}[5m]) > 1
+        for: 5m
+        labels:
+          severity: warning
+          team: data
+          service: postgresql
+        annotations:
+          summary: Slow database queries detected
+          description: Average query time is {{ $value | printf "%.2f" }} seconds
+          runbook_url: https://runbooks.example.com/slow-queries
+
+

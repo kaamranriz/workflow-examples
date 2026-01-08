@@ -1,0 +1,57 @@
+# Rate Limiting Alerts
+# Owner: Platform Team (@platform-oncall)
+# Last Updated: 2024-10-20
+
+groups:
+  - name: api-gateway.rate-limiting
+    interval: 30s
+    rules:
+      - alert: HighRateLimitRejections
+        expr: |
+          sum(rate(http_requests_total{job="api-gateway", status="429"}[5m])) 
+          / sum(rate(http_requests_total{job="api-gateway"}[5m])) > 0.10
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+          service: api-gateway
+          tier: frontend
+        annotations:
+          summary: "High rate of 429 responses from rate limiting"
+          description: "{{ $value | humanizePercentage }} of requests are being rate limited. This may indicate a DDoS or misconfigured client."
+          runbook_url: "https://runbooks.techcorp.io/api-gateway/rate-limiting"
+          dashboard_url: "https://grafana.techcorp.io/d/api-gateway-rate-limits"
+          slack_channel: "#platform-alerts"
+
+      - alert: RateLimiterRedisDown
+        expr: up{job="rate-limiter-redis"} == 0
+        for: 30s
+        labels:
+          severity: critical
+          team: platform
+          service: api-gateway
+          tier: infrastructure
+          pagerduty: enabled
+        annotations:
+          summary: "Rate limiter Redis is down"
+          description: "Rate limiter Redis instance {{ $labels.instance }} is unreachable. Rate limiting may be failing open."
+          runbook_url: "https://runbooks.techcorp.io/api-gateway/rate-limiter-redis-down"
+          dashboard_url: "https://grafana.techcorp.io/d/redis-overview"
+          slack_channel: "#platform-alerts"
+
+      - alert: RateLimiterHighMemory
+        expr: redis_memory_used_bytes{job="rate-limiter-redis"} / redis_memory_max_bytes{job="rate-limiter-redis"} > 0.85
+        for: 10m
+        labels:
+          severity: warning
+          team: platform
+          service: api-gateway
+          tier: infrastructure
+        annotations:
+          summary: "Rate limiter Redis memory usage high"
+          description: "Rate limiter Redis is using {{ $value | humanizePercentage }} of max memory. Consider increasing limits or investigating key growth."
+          runbook_url: "https://runbooks.techcorp.io/redis/high-memory"
+          dashboard_url: "https://grafana.techcorp.io/d/redis-overview"
+          slack_channel: "#platform-alerts"
+
+

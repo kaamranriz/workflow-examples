@@ -1,0 +1,99 @@
+# User Service Alerts
+# Owner: Identity Team (@identity-oncall)
+# Last Updated: 2024-10-30
+
+groups:
+  - name: user-service.availability
+    interval: 30s
+    rules:
+      - alert: UserServiceDown
+        expr: up{job="user-service"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          team: identity
+          service: user-service
+          tier: backend
+          pagerduty: enabled
+        annotations:
+          summary: "User Service is down"
+          description: "User Service instance {{ $labels.instance }} is unreachable. Login and user operations will fail."
+          runbook_url: "https://runbooks.techcorp.io/user-service/down"
+          dashboard_url: "https://grafana.techcorp.io/d/user-service-overview"
+          slack_channel: "#identity-alerts"
+
+      - alert: UserServiceHighErrorRate
+        expr: |
+          sum(rate(http_requests_total{job="user-service", status=~"5.."}[5m])) 
+          / sum(rate(http_requests_total{job="user-service"}[5m])) > 0.02
+        for: 3m
+        labels:
+          severity: critical
+          team: identity
+          service: user-service
+          tier: backend
+          pagerduty: enabled
+        annotations:
+          summary: "High error rate on User Service"
+          description: "User Service error rate is {{ $value | humanizePercentage }}, exceeding 2% threshold."
+          runbook_url: "https://runbooks.techcorp.io/user-service/high-error-rate"
+          dashboard_url: "https://grafana.techcorp.io/d/user-service-errors"
+          slack_channel: "#identity-alerts"
+
+  - name: user-service.authentication
+    interval: 30s
+    rules:
+      - alert: AuthenticationFailureRateHigh
+        expr: |
+          sum(rate(authentication_attempts_total{job="user-service", result="failure"}[5m])) 
+          / sum(rate(authentication_attempts_total{job="user-service"}[5m])) > 0.20
+        for: 5m
+        labels:
+          severity: warning
+          team: identity
+          service: user-service
+          tier: backend
+        annotations:
+          summary: "High authentication failure rate"
+          description: "Authentication failure rate is {{ $value | humanizePercentage }}. May indicate credential stuffing attack or service issue."
+          runbook_url: "https://runbooks.techcorp.io/user-service/auth-failures"
+          dashboard_url: "https://grafana.techcorp.io/d/user-service-auth"
+          slack_channel: "#identity-alerts"
+
+      - alert: JWTVerificationErrors
+        expr: sum(rate(jwt_verification_errors_total{job="user-service"}[5m])) > 10
+        for: 5m
+        labels:
+          severity: warning
+          team: identity
+          service: user-service
+          tier: backend
+        annotations:
+          summary: "High JWT verification error rate"
+          description: "JWT verification is failing at {{ $value | printf \"%.1f\" }} errors/second. May indicate key rotation issue or attack."
+          runbook_url: "https://runbooks.techcorp.io/user-service/jwt-errors"
+          dashboard_url: "https://grafana.techcorp.io/d/user-service-auth"
+          slack_channel: "#identity-alerts"
+
+  - name: user-service.sessions
+    interval: 60s
+    rules:
+      - alert: SessionStoreHighLatency
+        expr: |
+          histogram_quantile(0.95, 
+            sum(rate(redis_command_duration_seconds_bucket{job="session-redis"}[5m])) by (le)
+          ) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          team: identity
+          service: user-service
+          tier: infrastructure
+        annotations:
+          summary: "Session store latency is high"
+          description: "Redis session store P95 latency is {{ $value | humanizeDuration }}. Login may feel slow."
+          runbook_url: "https://runbooks.techcorp.io/user-service/session-latency"
+          dashboard_url: "https://grafana.techcorp.io/d/redis-sessions"
+          slack_channel: "#identity-alerts"
+
+
