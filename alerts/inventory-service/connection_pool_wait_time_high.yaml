@@ -1,0 +1,11 @@
+alert: ConnectionPoolWaitTimeHigh
+expr: avg(rate(connection_pool_wait_time_seconds_sum[1m]) / rate(connection_pool_wait_time_seconds_count[1m]))
+  > 0.1
+for: 0m
+labels:
+  severity: warning
+  team: Team
+  component: database
+annotations:
+  summary: Connection pool wait time is high
+  description: Alert when average connection pool wait time exceeds 100ms

@@ -1,0 +1,10 @@
+alert: RedisMemoryUsageHigh
+expr: (redis_memory_usage_bytes / redis_maxmemory_bytes) * 100 > 75
+for: 0m
+labels:
+  severity: warning
+  team: Team
+  component: cache
+annotations:
+  summary: Redis memory usage is high
+  description: Alert when Redis memory usage exceeds 75% of maxmemory

@@ -1,0 +1,10 @@
+alert: RedisSentinelFailover
+expr: rate(redis_sentinel_failover_total[1m]) > 0
+for: 0m
+labels:
+  severity: critical
+  team: Team
+  component: cache
+annotations:
+  summary: Redis Sentinel failover detected
+  description: Alert immediately when Sentinel performs a failover

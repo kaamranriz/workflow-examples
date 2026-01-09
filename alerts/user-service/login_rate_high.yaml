@@ -1,0 +1,10 @@
+alert: LoginRateHigh
+expr: rate(login_attempts_total[1m]) > 3 * rate(login_attempts_total[5m])
+for: 2m
+labels:
+  severity: warning
+  team: Team
+  component: api
+annotations:
+  summary: Login rate is high
+  description: Alert when login attempts exceed 3x normal rate for more than 2 minutes

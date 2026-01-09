@@ -8,7 +8,7 @@ groups:
     for: 5m
     labels:
       severity: warning
-      team: incident
+      team: cunt
       component: database
       service: inventory-service
     annotations:
