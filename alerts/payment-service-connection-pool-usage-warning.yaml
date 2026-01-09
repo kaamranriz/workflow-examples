@@ -1,0 +1,10 @@
+alert: PaymentServiceConnectionPoolUsageHighWarning
+expr: avg_over_time(connection_pool_usage{service="payment-service"}[2m]) > 70
+for: 2m
+labels:
+  severity: warning
+  team: retroshift squad
+  component: database
+annotations:
+  summary: Payment Service Connection Pool Usage High
+  description: Alert when connection pool usage exceeds 70% for more than 2 minutes

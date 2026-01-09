@@ -1,0 +1,10 @@
+alert: ApiGatewayRequestQueueDepthHigh
+expr: avg_over_time(request_queue_depth{service="api-gateway"}[1m]) > 1000
+for: 1m
+labels:
+  severity: warning
+  team: retroshift squad
+  component: api
+annotations:
+  summary: API Gateway Request Queue Depth High
+  description: Alert when pending request queue exceeds 1000 for more than 1 minute
