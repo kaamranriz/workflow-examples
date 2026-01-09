@@ -1,0 +1,10 @@
+alert: RedisEvictionsHigh
+expr: rate(redis_evictions_total[1m]) > 100
+for: 0m
+labels:
+  severity: warning
+  team: Team
+  component: cache
+annotations:
+  summary: Redis evictions are high
+  description: Alert when Redis key evictions exceed 100/second

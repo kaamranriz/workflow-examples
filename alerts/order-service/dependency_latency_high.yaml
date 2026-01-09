@@ -1,0 +1,11 @@
+alert: DependencyLatencyHigh
+expr: histogram_quantile(0.95, sum(rate(dependency_latency_seconds_bucket{service="inventory-service"}[5m]))
+  by (le)) > 1
+for: 0m
+labels:
+  severity: warning
+  team: Team
+  component: api
+annotations:
+  summary: Dependency latency is high
+  description: Alert when latency to inventory-service exceeds 1 second (P95)

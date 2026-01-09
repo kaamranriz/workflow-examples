@@ -1,0 +1,11 @@
+alert: QueryLatencyP95High
+expr: histogram_quantile(0.95, sum(rate(query_latency_seconds_bucket[5m])) by (le))
+  > 0.5
+for: 5m
+labels:
+  severity: warning
+  team: Team
+  component: database
+annotations:
+  summary: Query latency P95 is high
+  description: Alert when P95 query latency exceeds 500ms for more than 5 minutes
