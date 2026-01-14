@@ -1,10 +1,12 @@
 alert: UserServiceMemoryUsageIncrease
-expr: rate(memory_usage{service="user-service", component="worker"}[1h]) > 0.2
+expr: increase(container_memory_usage_bytes{job="user-service", component="worker"}[1h])
+  / avg_over_time(container_memory_usage_bytes{job="user-service", component="worker"}[1h])
+  > 0.2
 for: 1h
 labels:
   severity: warning
   team: farispotty
   component: worker
 annotations:
-  summary: High memory usage growth detected
+  summary: High memory usage increase in user-service
   description: Alert when memory usage grows more than 20% per hour

@@ -1,5 +1,6 @@
-alert: OomKilledEventDetected
-expr: rate(oomkilled_events{component="worker"}[1m]) > 0
+alert: OOMKilledEventDetected
+expr: increase(kube_pod_container_status_terminated_reason{reason="OOMKilled"}[1m])
+  > 0
 for: 0m
 labels:
   severity: critical

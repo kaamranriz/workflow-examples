@@ -1,5 +1,5 @@
 alert: PodRestartsHigh
-expr: rate(pod_restarts{component="worker"}[30m]) > 3
+expr: increase(kube_pod_container_status_restarts_total[30m]) > 3
 for: 30m
 labels:
   severity: warning
