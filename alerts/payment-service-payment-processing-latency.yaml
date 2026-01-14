@@ -1,0 +1,10 @@
+alert: PaymentProcessingLatencyHigh
+expr: histogram_quantile(0.95, sum(rate(payment_processing_latency_bucket{service="payment-service"}[3m])) by (le)) > 2
+for: 3m
+labels:
+  severity: warning
+  team: payments
+  component: api
+annotations:
+  summary: High payment processing latency
+  description: Alert when p95 latency exceeds 2 seconds for more than 3 minutes

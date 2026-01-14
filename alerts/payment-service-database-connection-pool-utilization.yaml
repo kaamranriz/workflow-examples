@@ -1,0 +1,10 @@
+alert: DatabaseConnectionPoolUtilizationHigh
+expr: avg_over_time(database_connection_pool_utilization{service="payment-service"}[2m]) > 80
+for: 2m
+labels:
+  severity: warning
+  team: payments
+  component: database
+annotations:
+  summary: High database connection pool utilization
+  description: Alert when connection pool usage exceeds 80% for more than 2 minutes

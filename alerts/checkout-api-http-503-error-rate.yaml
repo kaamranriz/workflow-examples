@@ -1,0 +1,10 @@
+alert: Http503ErrorRateHighCheckoutApi
+expr: rate(http_requests_total{service="checkout-api",status="503"}[1m]) / rate(http_requests_total{service="checkout-api"}[1m]) > 0.01
+for: 1m
+labels:
+  severity: critical
+  team: payments
+  component: api
+annotations:
+  summary: High 503 error rate in checkout-api
+  description: Alert when 503 error rate exceeds 1% for more than 1 minute

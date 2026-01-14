@@ -1,0 +1,10 @@
+alert: Http503ErrorRateHighPaymentService
+expr: rate(http_requests_total{service="payment-service",status="503"}[1m]) / rate(http_requests_total{service="payment-service"}[1m]) > 0.01
+for: 1m
+labels:
+  severity: critical
+  team: payments
+  component: api
+annotations:
+  summary: High 503 error rate in payment-service
+  description: Alert when 503 error rate exceeds 1% for more than 1 minute
