@@ -1,0 +1,10 @@
+alert: UserServiceAuthFailureRateHigh
+expr: rate(auth_failure_rate{service="user-service", component="api"}[2m]) > 0.05
+for: 2m
+labels:
+  severity: critical
+  team: farispotty
+  component: api
+annotations:
+  summary: High authentication failure rate
+  description: Alert when auth failure rate exceeds 5% for 2 minutes

@@ -1,0 +1,10 @@
+alert: UserServiceMemoryUsageIncrease
+expr: rate(memory_usage{service="user-service", component="worker"}[1h]) > 0.2
+for: 1h
+labels:
+  severity: warning
+  team: farispotty
+  component: worker
+annotations:
+  summary: High memory usage growth detected
+  description: Alert when memory usage grows more than 20% per hour

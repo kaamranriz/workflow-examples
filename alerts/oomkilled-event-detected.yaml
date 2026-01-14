@@ -1,0 +1,10 @@
+alert: OomKilledEventDetected
+expr: rate(oomkilled_events{component="worker"}[1m]) > 0
+for: 0m
+labels:
+  severity: critical
+  team: farispotty
+  component: worker
+annotations:
+  summary: OOMKilled event detected
+  description: Alert immediately when any pod is OOMKilled
