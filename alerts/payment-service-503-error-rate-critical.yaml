@@ -7,5 +7,5 @@ labels:
   team: Retroshift
   component: api
 annotations:
-  summary: Payment Service 503 Error Rate High
+  summary: High 503 error rate on payment-service
   description: Alert when 503 error rate exceeds 0.5% for more than 1 minute

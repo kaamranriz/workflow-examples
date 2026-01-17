@@ -7,5 +7,5 @@ labels:
   team: Retroshift
   component: api
 annotations:
-  summary: API Gateway Latency P95 High
+  summary: High latency P95 on api-gateway
   description: Reduce latency alert threshold timing to P95 > 500ms for 2 minutes

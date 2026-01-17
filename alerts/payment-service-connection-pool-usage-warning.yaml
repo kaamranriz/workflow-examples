@@ -6,5 +6,5 @@ labels:
   team: Retroshift
   component: database
 annotations:
-  summary: Payment Service Connection Pool Usage High
+  summary: High connection pool usage on payment-service
   description: Alert when connection pool usage exceeds 70% for more than 2 minutes

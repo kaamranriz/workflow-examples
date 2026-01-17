@@ -6,5 +6,5 @@ labels:
   team: Retroshift
   component: database
 annotations:
-  summary: Payment Service Connection Pool Usage Critical
+  summary: Critical connection pool usage on payment-service
   description: Alert when connection pool usage exceeds 90% for more than 30 seconds

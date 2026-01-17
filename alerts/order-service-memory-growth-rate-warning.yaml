@@ -5,7 +5,7 @@ for: 15m
 labels:
   severity: warning
   team: Retroshift
-  component: worker
+  component: cache
 annotations:
-  summary: Order Service Memory Growth Rate High
+  summary: High memory growth rate on order-service
   description: Alert when container memory usage grows more than 100MB in 15 minutes

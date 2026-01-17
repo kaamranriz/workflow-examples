@@ -5,8 +5,8 @@ for: 5m
 labels:
   severity: warning
   team: Retroshift
-  component: worker
+  component: cache
 annotations:
-  summary: Order Service Memory Utilization High
+  summary: High memory utilization on order-service
   description: Alert when container memory usage exceeds 80% of limit for more than
     5 minutes
