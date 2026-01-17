@@ -1,0 +1,12 @@
+alert: OrderServiceMemoryUtilizationHigh
+expr: (container_memory_usage_bytes{service="order-service"} / container_spec_memory_limit_bytes{service="order-service"})
+  * 100 > 80
+for: 5m
+labels:
+  severity: warning
+  team: Retroshift
+  component: worker
+annotations:
+  summary: Order Service Memory Utilization High
+  description: Alert when container memory usage exceeds 80% of limit for more than
+    5 minutes

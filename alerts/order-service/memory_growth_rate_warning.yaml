@@ -1,0 +1,11 @@
+alert: OrderServiceMemoryGrowthRateHigh
+expr: increase(container_memory_usage_bytes{service="order-service"}[15m]) > 100 *
+  1024 * 1024
+for: 15m
+labels:
+  severity: warning
+  team: Retroshift
+  component: worker
+annotations:
+  summary: Order Service Memory Growth Rate High
+  description: Alert when container memory usage grows more than 100MB in 15 minutes

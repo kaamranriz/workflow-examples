@@ -1,0 +1,11 @@
+alert: PaymentService503ErrorRateHigh
+expr: rate(http_requests_total{service="payment-service",status="503"}[1m]) / rate(http_requests_total{service="payment-service"}[1m])
+  > 0.005
+for: 1m
+labels:
+  severity: critical
+  team: Retroshift
+  component: api
+annotations:
+  summary: Payment Service 503 Error Rate High
+  description: Alert when 503 error rate exceeds 0.5% for more than 1 minute
