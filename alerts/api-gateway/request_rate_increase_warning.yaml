@@ -1,6 +1,6 @@
 alert: ApiGatewayRequestRateIncrease
-expr: (rate(http_requests_total{service="api-gateway"}[1h]) / rate(http_requests_total{service="api-gateway"}[2h]
-  offset 1h)) > 1.5
+expr: (rate(http_requests_total{service="api-gateway"}[1h]) - rate(http_requests_total{service="api-gateway"}[2h:1h]))
+  / rate(http_requests_total{service="api-gateway"}[2h:1h]) > 0.5
 for: 1h
 labels:
   severity: warning
