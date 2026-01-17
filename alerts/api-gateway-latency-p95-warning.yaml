@@ -4,8 +4,8 @@ expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{ser
 for: 2m
 labels:
   severity: warning
-  team: retroshift squad
+  team: Retroshift
   component: api
 annotations:
-  summary: API Gateway Latency P95 High
+  summary: High latency P95
   description: Reduce latency alert threshold timing to P95 > 500ms for 2 minutes

@@ -4,8 +4,8 @@ expr: increase(kube_pod_container_status_terminated_reason{reason="OOMKilled",se
 for: 0s
 labels:
   severity: critical
-  team: retroshift squad
+  team: Retroshift
   component: worker
 annotations:
-  summary: Order Service OOMKilled Event
+  summary: OOMKilled event detected
   description: Alert immediately when any order-service pod is OOMKilled
