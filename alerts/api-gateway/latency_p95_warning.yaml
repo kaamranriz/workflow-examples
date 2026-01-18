@@ -1,0 +1,11 @@
+alert: ApiGatewayLatencyP95High
+expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{service="api-gateway"}[2m]))
+  by (le)) > 0.5
+for: 2m
+labels:
+  severity: warning
+  team: Retroshift
+  component: api
+annotations:
+  summary: Latency P95 high
+  description: Reduce latency alert threshold timing to P95 > 500ms for 2 minutes

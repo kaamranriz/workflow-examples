@@ -1,0 +1,10 @@
+alert: PaymentServiceConnectionPoolUsageHighCritical
+expr: avg_over_time(connection_pool_usage{service="payment-service"}[30s]) > 90
+for: 30s
+labels:
+  severity: critical
+  team: Retroshift
+  component: database
+annotations:
+  summary: Connection pool usage critical
+  description: Alert when connection pool usage exceeds 90% for more than 30 seconds
