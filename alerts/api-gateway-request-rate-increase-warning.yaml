@@ -1,0 +1,12 @@
+alert: ApiGatewayRequestRateIncreaseWarning
+expr: (rate(http_requests_total{service="api-gateway"}[1h]) / rate(http_requests_total{service="api-gateway"}[2h:1h]))
+  > 1.5
+for: 1h
+labels:
+  severity: warning
+  team: Retroshift
+  component: api
+annotations:
+  summary: High request rate increase
+  description: Alert when request rate increases more than 50% compared to previous
+    hour
